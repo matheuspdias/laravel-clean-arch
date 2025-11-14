@@ -75,7 +75,7 @@ O projeto segue os princípios de Clean Architecture, organizando o código em c
 ### 1. Clone o repositório
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/matheuspdias/laravel-clean-arch.git
 cd laravel-clean-arch
 ```
 
