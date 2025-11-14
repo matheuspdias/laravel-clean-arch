@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/PHP-8.2-777BB4?style=for-the-badge&logo=php" alt="PHP">
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker" alt="Docker">
   <img src="https://img.shields.io/badge/Tests-58%20passing-success?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/API-Swagger%20Docs-85EA2D?style=for-the-badge&logo=swagger" alt="Swagger">
 </p>
 
 **Sistema de gerenciamento de usuários (CRUD) implementando Clean Architecture e Domain-Driven Design (DDD)**, demonstrando boas práticas de desenvolvimento de software com separação clara de responsabilidades, testabilidade e manutenibilidade.
@@ -32,6 +33,7 @@
 - 58 testes automatizados (Unit, Integration e Feature)
 - Containerização completa com Docker e Docker Compose
 - API RESTful com validação e tratamento de erros
+- Documentação Swagger/OpenAPI interativa
 - UUIDs como identificadores únicos
 - Password hashing com bcrypt
 
@@ -62,6 +64,7 @@ O projeto segue os princípios de Clean Architecture, organizando o código em c
 | **MySQL** | 8.0 | Banco de dados |
 | **Docker** | Latest | Containerização |
 | **PHPUnit** | 11.x | Testes |
+| **Swagger/OpenAPI** | 3.0 | Documentação API |
 | **Nginx** | Latest | Web server |
 | **phpMyAdmin** | Latest | Interface MySQL |
 
@@ -103,13 +106,23 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate
 ```
 
-### 6. Testar a API
+### 6. Gerar documentação Swagger
+
+```bash
+docker compose exec app php artisan l5-swagger:generate
+```
+
+### 7. Testar a API
 
 ```bash
 curl http://localhost:8000/api/v1/users
 ```
 
 **Pronto!** A aplicação está rodando em `http://localhost:8000`
+
+### Acessar Documentação Swagger
+
+Acesse a documentação interativa da API em: **http://localhost:8000/api/documentation**
 
 ## Documentação
 
@@ -118,6 +131,7 @@ O projeto possui documentação detalhada para cada aspecto:
 | Documento | Descrição |
 |-----------|-----------|
 | [API_DOCUMENTATION.md](API_DOCUMENTATION.md) | Documentação completa da API REST, endpoints, requests, responses e exemplos |
+| [SWAGGER_DOCUMENTATION.md](SWAGGER_DOCUMENTATION.md) | Guia da documentação Swagger/OpenAPI interativa e como usá-la |
 | [DOCKER.md](DOCKER.md) | Guia completo do ambiente Docker: serviços, comandos úteis e troubleshooting |
 | [DTOS_DOCUMENTATION.md](DTOS_DOCUMENTATION.md) | Explicação sobre DTOs: o que são, por que usar e exemplos práticos |
 | [TESTS_DOCUMENTATION.md](TESTS_DOCUMENTATION.md) | Guia de testes: estrutura, tipos, cobertura, TDD e boas práticas |
@@ -125,6 +139,8 @@ O projeto possui documentação detalhada para cada aspecto:
 ## API Endpoints
 
 **Base URL**: `http://localhost:8000/api/v1`
+
+**Documentação Interativa**: [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)
 
 | Método | Endpoint | Descrição | Auth |
 |--------|----------|-----------|------|
@@ -161,7 +177,18 @@ curl -X POST http://localhost:8000/api/v1/users \
 }
 ```
 
-Ver [API_DOCUMENTATION.md](API_DOCUMENTATION.md) para mais detalhes.
+### Documentação Interativa (Swagger)
+
+Você também pode testar todos os endpoints através da **interface interativa Swagger**:
+
+1. Acesse: http://localhost:8000/api/documentation
+2. Escolha um endpoint (ex: POST /api/v1/users)
+3. Clique em "Try it out"
+4. Preencha os dados no formulário
+5. Clique em "Execute"
+6. Veja a resposta em tempo real
+
+Ver [API_DOCUMENTATION.md](API_DOCUMENTATION.md) para mais detalhes ou [SWAGGER_DOCUMENTATION.md](SWAGGER_DOCUMENTATION.md) para guia completo do Swagger.
 
 ## Testes
 
@@ -308,6 +335,7 @@ O ambiente Docker possui 4 serviços:
 ### Acessos
 
 - **Aplicação**: http://localhost:8000
+- **Documentação API (Swagger)**: http://localhost:8000/api/documentation
 - **phpMyAdmin**: http://localhost:8080
   - Usuário: `root`
   - Senha: `root`
@@ -340,6 +368,9 @@ docker compose exec app php artisan migrate
 
 # Reverter migrations
 docker compose exec app php artisan migrate:rollback
+
+# Gerar documentação Swagger
+docker compose exec app php artisan l5-swagger:generate
 
 # Limpar caches
 docker compose exec app php artisan cache:clear

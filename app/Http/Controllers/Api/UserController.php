@@ -10,6 +10,8 @@ use App\Application\User\UseCases\DeleteUserUseCase;
 use App\Application\User\UseCases\GetUserUseCase;
 use App\Application\User\UseCases\ListUsersUseCase;
 use App\Application\User\UseCases\UpdateUserUseCase;
+use App\Http\Controllers\Api\Swagger\SwaggerInfo;
+use App\Http\Controllers\Api\Swagger\UserSwaggerDocumentation;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +20,8 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    use SwaggerInfo;
+    use UserSwaggerDocumentation;
     public function index(Request $request, ListUsersUseCase $useCase): JsonResponse
     {
         $dto = ListUsersDTO::fromArray($request->query());
