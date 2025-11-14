@@ -1,59 +1,396 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Clean Architecture + DDD
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://img.shields.io/badge/Laravel-12.x-red?style=for-the-badge&logo=laravel" alt="Laravel">
+  <img src="https://img.shields.io/badge/PHP-8.2-777BB4?style=for-the-badge&logo=php" alt="PHP">
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker" alt="Docker">
+  <img src="https://img.shields.io/badge/Tests-58%20passing-success?style=for-the-badge" alt="Tests">
 </p>
 
-## About Laravel
+**Sistema de gerenciamento de usuários (CRUD) implementando Clean Architecture e Domain-Driven Design (DDD)**, demonstrando boas práticas de desenvolvimento de software com separação clara de responsabilidades, testabilidade e manutenibilidade.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Índice
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Características](#características)
+- [Arquitetura](#arquitetura)
+- [Tecnologias](#tecnologias)
+- [Quick Start](#quick-start)
+- [Documentação](#documentação)
+- [API Endpoints](#api-endpoints)
+- [Testes](#testes)
+- [Princípios e Padrões](#princípios-e-padrões)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Roadmap](#roadmap)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Características
 
-## Learning Laravel
+- Clean Architecture com separação em 4 camadas (Domain, Application, Infrastructure, Presentation)
+- Domain-Driven Design com Entities, Value Objects e Domain Services
+- DTOs (Data Transfer Objects) para transferência de dados entre camadas
+- Repository Pattern com interfaces no Domain e implementação na Infrastructure
+- Use Cases para orquestração de lógica de negócio
+- 58 testes automatizados (Unit, Integration e Feature)
+- Containerização completa com Docker e Docker Compose
+- API RESTful com validação e tratamento de erros
+- UUIDs como identificadores únicos
+- Password hashing com bcrypt
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Arquitetura
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+O projeto segue os princípios de Clean Architecture, organizando o código em camadas concêntricas:
 
-## Laravel Sponsors
+```
+┌─────────────────────────────────────────┐
+│         Presentation Layer (HTTP)       │  Controllers, Resources, Routes
+├─────────────────────────────────────────┤
+│       Application Layer (Use Cases)     │  CreateUser, UpdateUser, ListUsers
+├─────────────────────────────────────────┤
+│      Domain Layer (Business Logic)      │  Entities, Value Objects, Services
+├─────────────────────────────────────────┤
+│     Infrastructure Layer (Technical)    │  Eloquent, Repositories, Providers
+└─────────────────────────────────────────┘
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Regra de Dependência**: As dependências apontam sempre para dentro. O Domain não conhece nada sobre Infrastructure ou HTTP.
 
-### Premium Partners
+## Tecnologias
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Tecnologia | Versão | Uso |
+|------------|--------|-----|
+| **Laravel** | 12.x | Framework PHP |
+| **PHP** | 8.2 | Linguagem |
+| **MySQL** | 8.0 | Banco de dados |
+| **Docker** | Latest | Containerização |
+| **PHPUnit** | 11.x | Testes |
+| **Nginx** | Latest | Web server |
+| **phpMyAdmin** | Latest | Interface MySQL |
 
-## Contributing
+## Quick Start
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Pré-requisitos
 
-## Code of Conduct
+- Docker Desktop instalado
+- Docker Compose instalado
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 1. Clone o repositório
 
-## Security Vulnerabilities
+```bash
+git clone <repository-url>
+cd laravel-clean-arch
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 2. Subir o ambiente Docker
 
-## License
+```bash
+docker compose up -d --build
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 3. Instalar dependências
+
+```bash
+docker compose exec app composer install
+```
+
+### 4. Configurar o ambiente
+
+```bash
+docker compose exec app php artisan key:generate
+```
+
+### 5. Rodar migrations
+
+```bash
+docker compose exec app php artisan migrate
+```
+
+### 6. Testar a API
+
+```bash
+curl http://localhost:8000/api/v1/users
+```
+
+**Pronto!** A aplicação está rodando em `http://localhost:8000`
+
+## Documentação
+
+O projeto possui documentação detalhada para cada aspecto:
+
+| Documento | Descrição |
+|-----------|-----------|
+| [API_DOCUMENTATION.md](API_DOCUMENTATION.md) | Documentação completa da API REST, endpoints, requests, responses e exemplos |
+| [DOCKER.md](DOCKER.md) | Guia completo do ambiente Docker: serviços, comandos úteis e troubleshooting |
+| [DTOS_DOCUMENTATION.md](DTOS_DOCUMENTATION.md) | Explicação sobre DTOs: o que são, por que usar e exemplos práticos |
+| [TESTS_DOCUMENTATION.md](TESTS_DOCUMENTATION.md) | Guia de testes: estrutura, tipos, cobertura, TDD e boas práticas |
+
+## API Endpoints
+
+**Base URL**: `http://localhost:8000/api/v1`
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/users` | Listar usuários (paginado) | - |
+| GET | `/users/{id}` | Buscar usuário por ID | - |
+| POST | `/users` | Criar novo usuário | - |
+| PUT | `/users/{id}` | Atualizar usuário | - |
+| DELETE | `/users/{id}` | Deletar usuário | - |
+
+### Exemplo de Requisição
+
+```bash
+curl -X POST http://localhost:8000/api/v1/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "João Silva",
+    "email": "joao@example.com",
+    "password": "senha123"
+  }'
+```
+
+### Exemplo de Resposta
+
+```json
+{
+  "message": "Usuário criado com sucesso",
+  "data": {
+    "id": "9d7c1a2b-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+    "name": "João Silva",
+    "email": "joao@example.com",
+    "created_at": "2025-11-13 20:00:00",
+    "updated_at": "2025-11-13 20:00:00"
+  }
+}
+```
+
+Ver [API_DOCUMENTATION.md](API_DOCUMENTATION.md) para mais detalhes.
+
+## Testes
+
+O projeto possui **58 testes automatizados** distribuídos em 3 categorias:
+
+```
+tests/
+├── Unit/                    # 32 testes - Lógica de negócio isolada
+│   ├── Domain/
+│   │   ├── Entities/       # 8 testes
+│   │   └── ValueObjects/   # 11 testes
+│   └── Application/
+│       └── UseCases/       # 13 testes
+│
+├── Integration/             # 13 testes - Integração com banco
+│   └── Infrastructure/
+│       └── Persistence/
+│
+└── Feature/                 # 13 testes - API end-to-end
+    └── Api/
+```
+
+### Executar Testes
+
+```bash
+# Todos os testes
+docker compose exec app php artisan test
+
+# Apenas testes unitários
+docker compose exec app php artisan test --testsuite=Unit
+
+# Com cobertura de código
+docker compose exec app php artisan test --coverage
+
+# Testes em paralelo
+docker compose exec app php artisan test --parallel
+```
+
+### Cobertura de Testes
+
+- **Value Objects**: 100% - 11 testes
+- **Entities**: 100% - 8 testes
+- **Use Cases**: 100% - 13 testes
+- **Repository**: 100% - 13 testes
+- **API**: 100% - 13 testes
+
+Ver [TESTS_DOCUMENTATION.md](TESTS_DOCUMENTATION.md) para guia completo.
+
+## Princípios e Padrões
+
+### Clean Architecture
+
+- **Separação de Responsabilidades**: Cada camada tem sua responsabilidade bem definida
+- **Independência de Frameworks**: Domain não conhece Laravel
+- **Testabilidade**: Lógica de negócio totalmente testável
+- **Independência de UI**: Use Cases podem ser usados em CLI, API, GraphQL, etc.
+- **Independência de Banco**: Repository abstrai completamente a persistência
+
+### Domain-Driven Design (DDD)
+
+- **Entities**: `User` - Objetos com identidade e ciclo de vida
+- **Value Objects**: `UserId`, `Email` - Objetos imutáveis sem identidade própria
+- **Repositories**: Interfaces no Domain, implementação na Infrastructure
+- **Domain Services**: `UserDomainService` - Lógica que não pertence a uma entidade específica
+- **Use Cases**: Orquestração das operações de negócio
+
+### SOLID Principles
+
+| Princípio | Aplicação no Projeto |
+|-----------|---------------------|
+| **SRP** | Cada classe tem uma única responsabilidade |
+| **OCP** | Aberto para extensão (interfaces), fechado para modificação |
+| **LSP** | Substituição por interfaces (UserRepository) |
+| **ISP** | Interfaces específicas e segregadas |
+| **DIP** | Dependência de abstrações, não de implementações concretas |
+
+### DTOs (Data Transfer Objects)
+
+DTOs garantem **type safety** e **desacoplamento** entre as camadas:
+
+- **Request DTOs**: `CreateUserDTO`, `UpdateUserDTO`, `ListUsersDTO`
+- **Response DTOs**: `UserDTO`, `UserListDTO`
+
+Ver [DTOS_DOCUMENTATION.md](DTOS_DOCUMENTATION.md) para mais informações.
+
+## Estrutura do Projeto
+
+```
+app/
+├── Domain/                          # Camada de Domínio (regras de negócio puras)
+│   └── User/
+│       ├── Entities/               # User.php
+│       ├── ValueObjects/           # UserId.php, Email.php
+│       ├── Repositories/           # UserRepository.php (interface)
+│       └── Services/               # UserDomainService.php
+│
+├── Application/                     # Camada de Aplicação (casos de uso)
+│   └── User/
+│       ├── DTOs/
+│       │   ├── Request/            # CreateUserDTO, UpdateUserDTO, etc.
+│       │   └── Response/           # UserDTO, UserListDTO
+│       └── UseCases/
+│           ├── CreateUserUseCase.php
+│           ├── UpdateUserUseCase.php
+│           ├── DeleteUserUseCase.php
+│           ├── GetUserUseCase.php
+│           └── ListUsersUseCase.php
+│
+├── Infrastructure/                  # Camada de Infraestrutura (implementações técnicas)
+│   ├── Persistence/
+│   │   └── Eloquent/
+│   │       ├── UserModel.php
+│   │       └── EloquentUserRepository.php
+│   └── Providers/
+│       └── RepositoryServiceProvider.php
+│
+└── Http/                           # Camada de Apresentação (interface HTTP)
+    ├── Controllers/
+    │   └── Api/
+    │       └── UserController.php
+    └── Resources/
+        └── UserResource.php
+```
+
+## Regras de Negócio
+
+- Nome deve ter **no mínimo 3 caracteres**
+- Email deve ser **válido e único** no sistema
+- Senha é **hasheada automaticamente** usando bcrypt
+- IDs são **UUIDs v4** gerados automaticamente
+- Email é **normalizado para lowercase**
+
+## Docker Services
+
+O ambiente Docker possui 4 serviços:
+
+| Serviço | Descrição | Porta |
+|---------|-----------|-------|
+| **app** | PHP 8.2-FPM com Laravel | - |
+| **nginx** | Servidor web | 8000 |
+| **mysql** | MySQL 8.0 | 3306 |
+| **phpmyadmin** | Interface web MySQL | 8080 |
+
+### Acessos
+
+- **Aplicação**: http://localhost:8000
+- **phpMyAdmin**: http://localhost:8080
+  - Usuário: `root`
+  - Senha: `root`
+
+Ver [DOCKER.md](DOCKER.md) para comandos úteis e troubleshooting.
+
+## Comandos Úteis
+
+### Docker
+
+```bash
+# Entrar no container
+docker compose exec app bash
+
+# Ver logs
+docker compose logs -f app
+
+# Parar containers
+docker compose down
+
+# Rebuild completo
+docker compose down -v && docker compose build --no-cache && docker compose up -d
+```
+
+### Laravel Artisan
+
+```bash
+# Rodar migrations
+docker compose exec app php artisan migrate
+
+# Reverter migrations
+docker compose exec app php artisan migrate:rollback
+
+# Limpar caches
+docker compose exec app php artisan cache:clear
+docker compose exec app php artisan config:clear
+docker compose exec app php artisan view:clear
+
+# Rodar testes
+docker compose exec app php artisan test
+```
+
+## Roadmap
+
+### Implementado
+
+- [x] Clean Architecture com 4 camadas
+- [x] DDD com Entities, Value Objects e Domain Services
+- [x] DTOs para todas as operações
+- [x] Repository Pattern
+- [x] 58 testes automatizados (100% cobertura em camadas críticas)
+- [x] Containerização completa com Docker
+- [x] API RESTful documentada
+
+### Próximos Passos
+
+- [ ] Autenticação JWT
+- [ ] Eventos de Domínio (Domain Events)
+- [ ] Observabilidade (Logs estruturados, Métricas)
+- [ ] Cache (Redis)
+- [ ] Validação de CPF como Value Object
+- [ ] Soft Deletes
+- [ ] GraphQL API
+- [ ] Command Bus Pattern
+- [ ] Event Sourcing
+- [ ] CQRS (Command Query Responsibility Segregation)
+
+## Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## Licença
+
+Este projeto é licenciado sob a [MIT License](https://opensource.org/licenses/MIT).
+
+## Contato
+
+Para dúvidas ou sugestões, abra uma issue no repositório.
+
+---
+
+**Desenvolvido com Clean Architecture + DDD**
