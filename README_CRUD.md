@@ -23,12 +23,16 @@ app/
 │       └── Services/               # Domain Services
 │
 ├── Application/                     # Casos de uso
-│   └── User/UseCases/
-│       ├── CreateUserUseCase.php
-│       ├── UpdateUserUseCase.php
-│       ├── DeleteUserUseCase.php
-│       ├── GetUserUseCase.php
-│       └── ListUsersUseCase.php
+│   └── User/
+│       ├── DTOs/                   # Data Transfer Objects
+│       │   ├── Request/            # DTOs de entrada
+│       │   └── Response/           # DTOs de saída
+│       └── UseCases/
+│           ├── CreateUserUseCase.php
+│           ├── UpdateUserUseCase.php
+│           ├── DeleteUserUseCase.php
+│           ├── GetUserUseCase.php
+│           └── ListUsersUseCase.php
 │
 ├── Infrastructure/                  # Implementações técnicas
 │   ├── Persistence/Eloquent/
@@ -125,6 +129,12 @@ docker compose logs -f app
 - ✅ Interface Segregation
 - ✅ Dependency Inversion
 
+### DTOs (Data Transfer Objects)
+- ✅ Request DTOs (entrada dos Use Cases)
+- ✅ Response DTOs (saída dos Use Cases)
+- ✅ Desacoplamento entre camadas
+- ✅ Type Safety em toda aplicação
+
 ## Exemplo de Uso
 
 ```bash
@@ -145,6 +155,8 @@ curl http://localhost:8000/api/v1/users
 
 - 📄 [DOCKER.md](DOCKER.md) - Documentação do Docker
 - 📄 [API_DOCUMENTATION.md](API_DOCUMENTATION.md) - Documentação completa da API
+- 📄 [DTOS_DOCUMENTATION.md](DTOS_DOCUMENTATION.md) - Documentação sobre DTOs
+- 📄 [TESTS_DOCUMENTATION.md](TESTS_DOCUMENTATION.md) - Documentação de testes
 - 📄 [test-api.sh](test-api.sh) - Script de teste automatizado
 
 ## Regras de Negócio
@@ -154,11 +166,42 @@ curl http://localhost:8000/api/v1/users
 - Senha é hasheada automaticamente (bcrypt)
 - IDs são UUIDs v4
 
+## Testes
+
+### Estrutura de Testes
+```
+tests/
+├── Unit/                    # Testes unitários (32 testes)
+│   ├── Domain/
+│   └── Application/
+├── Integration/             # Testes de integração (13 testes)
+│   └── Infrastructure/
+└── Feature/                 # Testes E2E (13 testes)
+    └── Api/
+```
+
+### Executar Testes
+
+```bash
+# Todos os testes (58 testes)
+docker compose exec app php artisan test
+
+# Apenas unitários
+docker compose exec app php artisan test --testsuite=Unit
+
+# Com cobertura
+docker compose exec app php artisan test --coverage
+```
+
+📖 **[Documentação Completa de Testes](TESTS_DOCUMENTATION.md)**
+
 ## Próximos Passos
 
+- [x] ✅ Adicionar DTOs
+- [x] ✅ Adicionar testes unitários
+- [x] ✅ Adicionar testes de integração
+- [x] ✅ Adicionar testes de feature
 - [ ] Implementar autenticação JWT
-- [ ] Adicionar testes unitários
-- [ ] Adicionar testes de integração
 - [ ] Implementar eventos de domínio
 - [ ] Adicionar observabilidade (logs, métricas)
 - [ ] Implementar cache
