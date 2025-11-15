@@ -414,19 +414,6 @@ docker compose exec app php artisan test
 - [x] Containerização completa com Docker
 - [x] API RESTful documentada
 
-### Próximos Passos
-
-- [ ] Autenticação JWT
-- [ ] Eventos de Domínio (Domain Events)
-- [ ] Observabilidade (Logs estruturados, Métricas)
-- [ ] Cache (Redis)
-- [ ] Validação de CPF como Value Object
-- [ ] Soft Deletes
-- [ ] GraphQL API
-- [ ] Command Bus Pattern
-- [ ] Event Sourcing
-- [ ] CQRS (Command Query Responsibility Segregation)
-
 ## Contribuindo
 
 1. Fork o projeto
