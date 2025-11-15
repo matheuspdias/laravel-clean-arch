@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Infrastructure\Persistence\Eloquent;
+namespace App\Infrastructure\Persistence\Eloquent\User;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class UserModel extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $table = 'users';
 

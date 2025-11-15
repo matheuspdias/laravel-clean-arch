@@ -3,8 +3,8 @@
 namespace Tests\Feature\Api;
 
 use App\Domain\User\Entities\User;
-use App\Infrastructure\Persistence\Eloquent\EloquentUserRepository;
-use App\Infrastructure\Persistence\Eloquent\UserModel;
+use App\Infrastructure\Persistence\Eloquent\User\EloquentUserRepository;
+use App\Infrastructure\Persistence\Eloquent\User\UserModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

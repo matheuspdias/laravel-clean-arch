@@ -3,7 +3,7 @@
 namespace App\Infrastructure\Providers;
 
 use App\Domain\User\Repositories\UserRepository;
-use App\Infrastructure\Persistence\Eloquent\EloquentUserRepository;
+use App\Infrastructure\Persistence\Eloquent\User\EloquentUserRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
