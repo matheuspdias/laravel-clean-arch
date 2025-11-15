@@ -279,17 +279,17 @@ Ver [DTOS_DOCUMENTATION.md](DTOS_DOCUMENTATION.md) para mais informações.
 ```
 app/
 ├── Domain/                          # Camada de Domínio (regras de negócio puras)
-│   └── User/
-│       ├── Entities/               # User.php
-│       ├── ValueObjects/           # UserId.php, Email.php
-│       ├── Repositories/           # UserRepository.php (interface)
-│       └── Services/               # UserDomainService.php
+│   └── User/                        # Módulo User (Bounded Context)
+│       ├── Entities/                # User.php
+│       ├── ValueObjects/            # UserId.php, Email.php
+│       ├── Repositories/            # UserRepository.php (interface)
+│       └── Services/                # UserDomainService.php
 │
 ├── Application/                     # Camada de Aplicação (casos de uso)
-│   └── User/
+│   └── User/                        # Módulo User
 │       ├── DTOs/
-│       │   ├── Request/            # CreateUserDTO, UpdateUserDTO, etc.
-│       │   └── Response/           # UserDTO, UserListDTO
+│       │   ├── Request/             # CreateUserDTO, UpdateUserDTO, etc.
+│       │   └── Response/            # UserDTO, UserListDTO
 │       └── UseCases/
 │           ├── CreateUserUseCase.php
 │           ├── UpdateUserUseCase.php
@@ -300,18 +300,39 @@ app/
 ├── Infrastructure/                  # Camada de Infraestrutura (implementações técnicas)
 │   ├── Persistence/
 │   │   └── Eloquent/
-│   │       ├── UserModel.php
-│   │       └── EloquentUserRepository.php
+│   │       └── User/                # Módulo User
+│   │           ├── UserModel.php
+│   │           └── EloquentUserRepository.php
 │   └── Providers/
 │       └── RepositoryServiceProvider.php
 │
-└── Http/                           # Camada de Apresentação (interface HTTP)
+└── Http/                            # Camada de Apresentação (interface HTTP)
     ├── Controllers/
     │   └── Api/
-    │       └── UserController.php
+    │       ├── User/                # Módulo User
+    │       │   └── UserController.php
+    │       └── Swagger/
+    │           ├── SwaggerInfo.php
+    │           └── UserSwaggerDocumentation.php
     └── Resources/
         └── UserResource.php
 ```
+
+### Organização por Módulos (Bounded Context)
+
+A estrutura segue o padrão de **Bounded Context** do DDD, onde cada módulo (User, Customer, etc.)
+possui suas próprias pastas organizadas de forma consistente em todas as camadas:
+
+- **Domain/[Módulo]/** - Regras de negócio e entidades do módulo
+- **Application/[Módulo]/** - Casos de uso específicos do módulo
+- **Infrastructure/Persistence/Eloquent/[Módulo]/** - Implementação de persistência do módulo
+- **Http/Controllers/Api/[Módulo]/** - Controllers HTTP do módulo
+
+Esta organização facilita:
+- ✅ Adição de novos módulos sem afetar os existentes
+- ✅ Manutenção e localização de código por contexto de negócio
+- ✅ Escalabilidade do projeto com múltiplos bounded contexts
+- ✅ Separação clara de responsabilidades por domínio
 
 ## Regras de Negócio
 
