@@ -41,20 +41,21 @@ class UserTest extends TestCase
 
     public function test_should_update_user_profile(): void
     {
-        $user = User::create(
+        $pastDate = new \DateTimeImmutable('2020-01-01 10:00:00');
+        $user = new User(
+            UserId::generate(),
             'John Doe',
-            'john@example.com',
-            'password123'
+            new Email('john@example.com'),
+            'hashed_password',
+            $pastDate,
+            $pastDate
         );
-
-        $originalUpdatedAt = $user->updatedAt();
-        sleep(1); // Garante que o timestamp será diferente
 
         $user->updateProfile('Jane Doe', 'jane@example.com');
 
         $this->assertEquals('Jane Doe', $user->name());
         $this->assertEquals('jane@example.com', $user->email()->value());
-        $this->assertGreaterThan($originalUpdatedAt, $user->updatedAt());
+        $this->assertGreaterThan($pastDate, $user->updatedAt());
     }
 
     public function test_should_change_password(): void

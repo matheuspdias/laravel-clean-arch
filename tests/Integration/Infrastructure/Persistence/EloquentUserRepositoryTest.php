@@ -3,7 +3,6 @@
 namespace Tests\Integration\Infrastructure\Persistence;
 
 use App\Domain\User\Entities\User;
-use App\Domain\User\ValueObjects\Email;
 use App\Domain\User\ValueObjects\UserId;
 use App\Infrastructure\Persistence\Eloquent\User\EloquentUserRepository;
 use App\Infrastructure\Persistence\Eloquent\User\UserModel;
@@ -29,9 +28,9 @@ class EloquentUserRepositoryTest extends TestCase
         $this->repository->save($user);
 
         $this->assertDatabaseHas('users', [
-            'id' => $user->id()->value(),
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
+            'id'    => $user->id()->value(),
+            'name'  => $user->name(),
+            'email' => $user->email()->value(),
         ]);
     }
 
@@ -44,11 +43,10 @@ class EloquentUserRepositoryTest extends TestCase
         $this->repository->save($user);
 
         $this->assertDatabaseHas('users', [
-            'id' => $user->id()->value(),
-            'name' => 'Jane Doe',
-            'email' => 'jane@example.com',
+            'id'    => $user->id()->value(),
+            'name'  => $user->name(),
+            'email' => $user->email()->value(),
         ]);
-
         $this->assertDatabaseCount('users', 1);
     }
 
@@ -57,21 +55,19 @@ class EloquentUserRepositoryTest extends TestCase
         $user = User::create('John Doe', 'john@example.com', 'password123');
         $this->repository->save($user);
 
-        $foundUser = $this->repository->findById($user->id());
+        $found = $this->repository->findById($user->id());
 
-        $this->assertNotNull($foundUser);
-        $this->assertEquals($user->id()->value(), $foundUser->id()->value());
-        $this->assertEquals('John Doe', $foundUser->name());
-        $this->assertEquals('john@example.com', $foundUser->email()->value());
+        $this->assertNotNull($found);
+        $this->assertEquals($user->id()->value(), $found->id()->value());
+        $this->assertEquals($user->name(), $found->name());
+        $this->assertEquals($user->email()->value(), $found->email()->value());
     }
 
     public function test_should_return_null_when_user_not_found_by_id(): void
     {
-        $userId = UserId::generate();
+        $found = $this->repository->findById(UserId::generate());
 
-        $foundUser = $this->repository->findById($userId);
-
-        $this->assertNull($foundUser);
+        $this->assertNull($found);
     }
 
     public function test_should_find_user_by_email(): void
@@ -79,20 +75,19 @@ class EloquentUserRepositoryTest extends TestCase
         $user = User::create('John Doe', 'john@example.com', 'password123');
         $this->repository->save($user);
 
-        $email = new Email('john@example.com');
-        $foundUser = $this->repository->findByEmail($email);
+        $found = $this->repository->findByEmail($user->email());
 
-        $this->assertNotNull($foundUser);
-        $this->assertEquals('john@example.com', $foundUser->email()->value());
+        $this->assertNotNull($found);
+        $this->assertEquals($user->email()->value(), $found->email()->value());
     }
 
     public function test_should_return_null_when_user_not_found_by_email(): void
     {
-        $email = new Email('nonexistent@example.com');
+        $user = User::create('John Doe', 'john@example.com', 'password123');
 
-        $foundUser = $this->repository->findByEmail($email);
+        $found = $this->repository->findByEmail($user->email());
 
-        $this->assertNull($foundUser);
+        $this->assertNull($found);
     }
 
     public function test_should_check_if_email_exists(): void
@@ -100,19 +95,14 @@ class EloquentUserRepositoryTest extends TestCase
         $user = User::create('John Doe', 'john@example.com', 'password123');
         $this->repository->save($user);
 
-        $email = new Email('john@example.com');
-        $exists = $this->repository->existsByEmail($email);
-
-        $this->assertTrue($exists);
+        $this->assertTrue($this->repository->existsByEmail($user->email()));
     }
 
     public function test_should_return_false_when_email_does_not_exist(): void
     {
-        $email = new Email('nonexistent@example.com');
+        $user = User::create('John Doe', 'john@example.com', 'password123');
 
-        $exists = $this->repository->existsByEmail($email);
-
-        $this->assertFalse($exists);
+        $this->assertFalse($this->repository->existsByEmail($user->email()));
     }
 
     public function test_should_delete_user(): void
@@ -122,51 +112,55 @@ class EloquentUserRepositoryTest extends TestCase
 
         $this->repository->delete($user->id());
 
-        $this->assertDatabaseMissing('users', [
-            'id' => $user->id()->value(),
-        ]);
+        $this->assertDatabaseMissing('users', ['id' => $user->id()->value()]);
     }
 
     public function test_should_find_all_users_with_pagination(): void
     {
-        for ($i = 1; $i <= 25; $i++) {
-            $user = User::create("User {$i}", "user{$i}@example.com", 'password123');
-            $this->repository->save($user);
+        $totalUsers = 25;
+        $perPage    = 10;
+
+        for ($i = 1; $i <= $totalUsers; $i++) {
+            $this->repository->save(User::create("User {$i}", "user{$i}@example.com", 'password123'));
         }
 
-        $users = $this->repository->findAll(1, 10);
+        $users = $this->repository->findAll(1, $perPage);
 
-        $this->assertCount(10, $users);
+        $this->assertCount($perPage, $users);
     }
 
     public function test_should_find_second_page_of_users(): void
     {
-        for ($i = 1; $i <= 25; $i++) {
-            $user = User::create("User {$i}", "user{$i}@example.com", 'password123');
-            $this->repository->save($user);
+        $totalUsers = 25;
+        $perPage    = 10;
+
+        for ($i = 1; $i <= $totalUsers; $i++) {
+            $this->repository->save(User::create("User {$i}", "user{$i}@example.com", 'password123'));
         }
 
-        $page2Users = $this->repository->findAll(2, 10);
+        $page1 = $this->repository->findAll(1, $perPage);
+        $page2 = $this->repository->findAll(2, $perPage);
 
-        $this->assertCount(10, $page2Users);
+        $this->assertCount($perPage, $page2);
+
+        $ids1 = array_map(fn(User $u) => $u->id()->value(), $page1);
+        $ids2 = array_map(fn(User $u) => $u->id()->value(), $page2);
+        $this->assertEmpty(array_intersect($ids1, $ids2));
     }
 
     public function test_should_count_users(): void
     {
-        for ($i = 1; $i <= 5; $i++) {
-            $user = User::create("User {$i}", "user{$i}@example.com", 'password123');
-            $this->repository->save($user);
+        $totalUsers = 5;
+
+        for ($i = 1; $i <= $totalUsers; $i++) {
+            $this->repository->save(User::create("User {$i}", "user{$i}@example.com", 'password123'));
         }
 
-        $count = $this->repository->count();
-
-        $this->assertEquals(5, $count);
+        $this->assertEquals($totalUsers, $this->repository->count());
     }
 
     public function test_should_return_empty_array_when_no_users(): void
     {
-        $users = $this->repository->findAll(1, 10);
-
-        $this->assertCount(0, $users);
+        $this->assertCount(0, $this->repository->findAll(1, 10));
     }
 }

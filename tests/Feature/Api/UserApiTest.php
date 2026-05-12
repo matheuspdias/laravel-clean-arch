@@ -22,43 +22,39 @@ class UserApiTest extends TestCase
 
     public function test_should_create_user_via_api(): void
     {
-        $response = $this->postJson('/api/v1/users', [
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
+        $payload = [
+            'name'     => 'John Doe',
+            'email'    => 'john@example.com',
             'password' => 'password123',
-        ]);
+        ];
+
+        $response = $this->postJson('/api/v1/users', $payload);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'message',
-                'data' => [
-                    'id',
-                    'name',
-                    'email',
-                    'created_at',
-                    'updated_at',
-                ]
+                'data' => ['id', 'name', 'email', 'created_at', 'updated_at'],
             ])
             ->assertJson([
                 'message' => 'Usuário criado com sucesso',
-                'data' => [
-                    'name' => 'John Doe',
-                    'email' => 'john@example.com',
-                ]
+                'data'    => [
+                    'name'  => $payload['name'],
+                    'email' => $payload['email'],
+                ],
             ]);
 
         $this->assertDatabaseHas('users', [
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
+            'name'  => $payload['name'],
+            'email' => $payload['email'],
         ]);
     }
 
     public function test_should_fail_to_create_user_with_invalid_data(): void
     {
         $response = $this->postJson('/api/v1/users', [
-            'name' => 'Jo', // Muito curto
-            'email' => 'invalid-email',
-            'password' => '123', // Muito curta
+            'name'     => 'Jo',
+            'email'    => 'invalid-email',
+            'password' => '123',
         ]);
 
         $response->assertStatus(422)
@@ -67,76 +63,61 @@ class UserApiTest extends TestCase
 
     public function test_should_fail_to_create_user_with_duplicate_email(): void
     {
-        $user = User::create('Jane Doe', 'duplicate@example.com', 'password123');
-        $this->repository->save($user);
+        $existing = User::create('Jane Doe', 'duplicate@example.com', 'password123');
+        $this->repository->save($existing);
 
         $response = $this->postJson('/api/v1/users', [
-            'name' => 'John Doe',
-            'email' => 'duplicate@example.com',
+            'name'     => 'John Doe',
+            'email'    => $existing->email()->value(),
             'password' => 'password123',
         ]);
 
         $response->assertStatus(422)
-            ->assertJson([
-                'message' => 'Email já está em uso',
-            ]);
+            ->assertJson(['message' => 'Email já está em uso']);
     }
 
     public function test_should_list_users_via_api(): void
     {
-        for ($i = 1; $i <= 3; $i++) {
-            $user = User::create("User {$i}", "user{$i}@example.com", 'password123');
-            $this->repository->save($user);
+        $totalUsers = 3;
+
+        for ($i = 1; $i <= $totalUsers; $i++) {
+            $this->repository->save(User::create("User {$i}", "user{$i}@example.com", 'password123'));
         }
 
         $response = $this->getJson('/api/v1/users');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
-                    '*' => [
-                        'id',
-                        'name',
-                        'email',
-                        'created_at',
-                        'updated_at',
-                    ]
-                ],
-                'meta' => [
-                    'total',
-                    'page',
-                    'per_page',
-                    'total_pages',
-                ]
+                'data' => ['*' => ['id', 'name', 'email', 'created_at', 'updated_at']],
+                'meta' => ['total', 'page', 'per_page', 'total_pages'],
             ])
-            ->assertJsonCount(3, 'data')
+            ->assertJsonCount($totalUsers, 'data')
             ->assertJson([
-                'meta' => [
-                    'total' => 3,
-                    'page' => 1,
-                    'per_page' => 15,
-                ]
+                'meta' => ['total' => $totalUsers],
             ]);
     }
 
     public function test_should_paginate_users(): void
     {
-        for ($i = 1; $i <= 25; $i++) {
-            $user = User::create("User {$i}", "user{$i}@example.com", 'password123');
-            $this->repository->save($user);
+        $totalUsers = 25;
+        $page       = 2;
+        $perPage    = 10;
+
+        for ($i = 1; $i <= $totalUsers; $i++) {
+            $this->repository->save(User::create("User {$i}", "user{$i}@example.com", 'password123'));
         }
 
-        $response = $this->getJson('/api/v1/users?page=2&per_page=10');
+        $response = $this->getJson("/api/v1/users?page={$page}&per_page={$perPage}");
 
         $response->assertStatus(200)
-            ->assertJsonCount(10, 'data')
+            ->assertJsonCount($perPage, 'data')
             ->assertJson([
                 'meta' => [
-                    'total' => 25,
-                    'page' => 2,
-                    'per_page' => 10,
-                    'total_pages' => 3,
-                ]
+                    'total'       => $totalUsers,
+                    'page'        => $page,
+                    'per_page'    => $perPage,
+                    'total_pages' => (int) ceil($totalUsers / $perPage),
+                ],
             ]);
     }
 
@@ -149,20 +130,14 @@ class UserApiTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => [
-                    'id',
-                    'name',
-                    'email',
-                    'created_at',
-                    'updated_at',
-                ]
+                'data' => ['id', 'name', 'email', 'created_at', 'updated_at'],
             ])
             ->assertJson([
                 'data' => [
-                    'id' => $user->id()->value(),
-                    'name' => 'John Doe',
-                    'email' => 'john@example.com',
-                ]
+                    'id'    => $user->id()->value(),
+                    'name'  => $user->name(),
+                    'email' => $user->email()->value(),
+                ],
             ]);
     }
 
@@ -171,35 +146,31 @@ class UserApiTest extends TestCase
         $response = $this->getJson('/api/v1/users/550e8400-e29b-41d4-a716-446655440000');
 
         $response->assertStatus(404)
-            ->assertJson([
-                'message' => 'Usuário não encontrado',
-            ]);
+            ->assertJson(['message' => 'Usuário não encontrado']);
     }
 
     public function test_should_update_user_via_api(): void
     {
-        $user = User::create('John Doe', 'john@example.com', 'password123');
+        $user    = User::create('John Doe', 'john@example.com', 'password123');
         $this->repository->save($user);
 
-        $response = $this->putJson("/api/v1/users/{$user->id()->value()}", [
-            'name' => 'Jane Doe',
-            'email' => 'jane@example.com',
-        ]);
+        $payload  = ['name' => 'Jane Doe', 'email' => 'jane@example.com'];
+        $response = $this->putJson("/api/v1/users/{$user->id()->value()}", $payload);
 
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'Usuário atualizado com sucesso',
-                'data' => [
-                    'id' => $user->id()->value(),
-                    'name' => 'Jane Doe',
-                    'email' => 'jane@example.com',
-                ]
+                'data'    => [
+                    'id'    => $user->id()->value(),
+                    'name'  => $payload['name'],
+                    'email' => $payload['email'],
+                ],
             ]);
 
         $this->assertDatabaseHas('users', [
-            'id' => $user->id()->value(),
-            'name' => 'Jane Doe',
-            'email' => 'jane@example.com',
+            'id'    => $user->id()->value(),
+            'name'  => $payload['name'],
+            'email' => $payload['email'],
         ]);
     }
 
@@ -209,7 +180,7 @@ class UserApiTest extends TestCase
         $this->repository->save($user);
 
         $response = $this->putJson("/api/v1/users/{$user->id()->value()}", [
-            'name' => 'J',
+            'name'  => 'J',
             'email' => 'invalid-email',
         ]);
 
@@ -225,14 +196,12 @@ class UserApiTest extends TestCase
         $this->repository->save($user2);
 
         $response = $this->putJson("/api/v1/users/{$user1->id()->value()}", [
-            'name' => 'User 1',
-            'email' => 'user2@example.com',
+            'name'  => $user1->name(),
+            'email' => $user2->email()->value(),
         ]);
 
         $response->assertStatus(422)
-            ->assertJson([
-                'message' => 'Email já está em uso por outro usuário',
-            ]);
+            ->assertJson(['message' => 'Email já está em uso por outro usuário']);
     }
 
     public function test_should_delete_user_via_api(): void
@@ -243,13 +212,9 @@ class UserApiTest extends TestCase
         $response = $this->deleteJson("/api/v1/users/{$user->id()->value()}");
 
         $response->assertStatus(200)
-            ->assertJson([
-                'message' => 'Usuário deletado com sucesso',
-            ]);
+            ->assertJson(['message' => 'Usuário deletado com sucesso']);
 
-        $this->assertDatabaseMissing('users', [
-            'id' => $user->id()->value(),
-        ]);
+        $this->assertDatabaseMissing('users', ['id' => $user->id()->value()]);
     }
 
     public function test_should_return_404_when_deleting_nonexistent_user(): void
@@ -257,9 +222,7 @@ class UserApiTest extends TestCase
         $response = $this->deleteJson('/api/v1/users/550e8400-e29b-41d4-a716-446655440000');
 
         $response->assertStatus(404)
-            ->assertJson([
-                'message' => 'Usuário não encontrado',
-            ]);
+            ->assertJson(['message' => 'Usuário não encontrado']);
     }
 
     public function test_should_not_expose_password_in_response(): void
