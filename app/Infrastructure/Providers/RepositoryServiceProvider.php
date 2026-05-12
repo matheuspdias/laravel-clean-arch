@@ -2,7 +2,9 @@
 
 namespace App\Infrastructure\Providers;
 
+use App\Application\Auth\Contracts\TokenService;
 use App\Domain\User\Repositories\UserRepository;
+use App\Infrastructure\Auth\SanctumTokenService;
 use App\Infrastructure\Persistence\Eloquent\User\EloquentUserRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -10,10 +12,8 @@ class RepositoryServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(
-            UserRepository::class,
-            EloquentUserRepository::class
-        );
+        $this->app->bind(UserRepository::class, EloquentUserRepository::class);
+        $this->app->bind(TokenService::class, SanctumTokenService::class);
     }
 
     public function boot(): void

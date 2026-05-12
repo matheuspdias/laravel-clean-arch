@@ -4,6 +4,13 @@ namespace App\Http\Controllers\Api\Swagger;
 
 use OpenApi\Attributes as OA;
 
+#[OA\SecurityScheme(
+    securityScheme: 'sanctum',
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+    description: 'Token de autenticação Bearer (Sanctum)'
+)]
 #[OA\Info(
     version: '1.0.0',
     title: 'Laravel Clean Architecture API',
