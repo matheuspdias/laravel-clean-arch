@@ -97,6 +97,7 @@ docker compose exec app composer install
 ### 4. Configurar o ambiente
 
 ```bash
+cp .env.example .env
 docker compose exec app php artisan key:generate
 ```
 
