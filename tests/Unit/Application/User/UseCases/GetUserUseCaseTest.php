@@ -4,60 +4,54 @@ namespace Tests\Unit\Application\User\UseCases;
 
 use App\Application\User\UseCases\GetUserUseCase;
 use App\Domain\User\Entities\User;
-use App\Domain\User\Repositories\UserRepository;
 use App\Domain\User\ValueObjects\UserId;
-use Mockery;
 use PHPUnit\Framework\TestCase;
+use Tests\Doubles\InMemoryUserRepository;
 
 class GetUserUseCaseTest extends TestCase
 {
-    private UserRepository $userRepository;
+    private InMemoryUserRepository $repository;
     private GetUserUseCase $useCase;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->userRepository = Mockery::mock(UserRepository::class);
-        $this->useCase = new GetUserUseCase($this->userRepository);
+        $this->repository = new InMemoryUserRepository();
+        $this->useCase    = new GetUserUseCase($this->repository);
     }
 
-    protected function tearDown(): void
+    public function test_should_return_user_by_id(): void
     {
-        Mockery::close();
-        parent::tearDown();
-    }
-
-    public function test_should_get_user_successfully(): void
-    {
-        $userId = UserId::generate();
         $user = User::create('John Doe', 'john@example.com', 'password123');
+        $this->repository->save($user);
 
-        $this->userRepository
-            ->shouldReceive('findById')
-            ->once()
-            ->with(Mockery::on(fn($id) => $id->value() === $userId->value()))
-            ->andReturn($user);
+        $output = $this->useCase->execute($user->id()->value());
 
-        $output = $this->useCase->execute($userId->value());
-
-        $this->assertEquals('John Doe', $output->name);
-        $this->assertEquals('john@example.com', $output->email);
+        $this->assertEquals($user->id()->value(), $output->id);
+        $this->assertEquals($user->name(), $output->name);
+        $this->assertEquals($user->email()->value(), $output->email);
         $this->assertInstanceOf(\DateTimeImmutable::class, $output->createdAt);
     }
 
-    public function test_should_throw_exception_when_user_not_found(): void
+    public function test_should_throw_when_user_not_found(): void
     {
-        $userId = UserId::generate();
-
-        $this->userRepository
-            ->shouldReceive('findById')
-            ->once()
-            ->andReturn(null);
-
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('Usuário não encontrado');
 
-        $this->useCase->execute($userId->value());
+        $this->useCase->execute(UserId::generate()->value());
+    }
+
+    public function test_should_return_correct_user_among_many(): void
+    {
+        $user1 = User::create('John Doe', 'john@example.com', 'password123');
+        $user2 = User::create('Jane Doe', 'jane@example.com', 'password456');
+        $this->repository->save($user1);
+        $this->repository->save($user2);
+
+        $output = $this->useCase->execute($user2->id()->value());
+
+        $this->assertEquals($user2->id()->value(), $output->id);
+        $this->assertEquals($user2->name(), $output->name);
     }
 }

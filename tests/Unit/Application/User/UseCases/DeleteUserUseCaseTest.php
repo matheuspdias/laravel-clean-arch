@@ -4,63 +4,62 @@ namespace Tests\Unit\Application\User\UseCases;
 
 use App\Application\User\UseCases\DeleteUserUseCase;
 use App\Domain\User\Entities\User;
-use App\Domain\User\Repositories\UserRepository;
 use App\Domain\User\ValueObjects\UserId;
-use Mockery;
 use PHPUnit\Framework\TestCase;
+use Tests\Doubles\InMemoryUserRepository;
 
 class DeleteUserUseCaseTest extends TestCase
 {
-    private UserRepository $userRepository;
+    private InMemoryUserRepository $repository;
     private DeleteUserUseCase $useCase;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->userRepository = Mockery::mock(UserRepository::class);
-        $this->useCase = new DeleteUserUseCase($this->userRepository);
-    }
-
-    protected function tearDown(): void
-    {
-        Mockery::close();
-        parent::tearDown();
+        $this->repository = new InMemoryUserRepository();
+        $this->useCase    = new DeleteUserUseCase($this->repository);
     }
 
     public function test_should_delete_user_successfully(): void
     {
-        $userId = UserId::generate();
         $user = User::create('John Doe', 'john@example.com', 'password123');
+        $this->repository->save($user);
 
-        $this->userRepository
-            ->shouldReceive('findById')
-            ->once()
-            ->with(Mockery::on(fn($id) => $id->value() === $userId->value()))
-            ->andReturn($user);
+        $this->useCase->execute($user->id()->value());
 
-        $this->userRepository
-            ->shouldReceive('delete')
-            ->once()
-            ->with(Mockery::on(fn($id) => $id->value() === $userId->value()));
-
-        $this->useCase->execute($userId->value());
-
-        $this->assertTrue(true); // Se chegou aqui, o teste passou
+        $deleted = $this->repository->findById($user->id());
+        $this->assertNull($deleted);
     }
 
-    public function test_should_throw_exception_when_user_not_found(): void
+    public function test_repository_is_empty_after_deletion(): void
     {
-        $userId = UserId::generate();
+        $user = User::create('John Doe', 'john@example.com', 'password123');
+        $this->repository->save($user);
 
-        $this->userRepository
-            ->shouldReceive('findById')
-            ->once()
-            ->andReturn(null);
+        $this->useCase->execute($user->id()->value());
 
+        $this->assertEquals(0, $this->repository->count());
+    }
+
+    public function test_should_throw_when_user_not_found(): void
+    {
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('Usuário não encontrado');
 
-        $this->useCase->execute($userId->value());
+        $this->useCase->execute(UserId::generate()->value());
+    }
+
+    public function test_should_only_delete_the_target_user(): void
+    {
+        $user1 = User::create('John Doe', 'john@example.com', 'password123');
+        $user2 = User::create('Jane Doe', 'jane@example.com', 'password456');
+        $this->repository->save($user1);
+        $this->repository->save($user2);
+
+        $this->useCase->execute($user1->id()->value());
+
+        $this->assertNull($this->repository->findById($user1->id()));
+        $this->assertNotNull($this->repository->findById($user2->id()));
     }
 }
